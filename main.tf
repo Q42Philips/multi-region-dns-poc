@@ -48,6 +48,17 @@ resource "google_compute_network" "default" {
   routing_mode            = "GLOBAL"
 }
 
+resource "google_compute_firewall" "http" {
+  name    = "${google_compute_network.default.name}-firewall-http"
+  network = google_compute_network.default.name
+  allow {
+    protocol = "tcp"
+    ports = ["80"]
+  }
+  target_tags   = ["${google_compute_network.default.name}-firewall-http"]
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "google_compute_instance" "vm" {
   provider = google
 
@@ -65,7 +76,7 @@ resource "google_compute_instance" "vm" {
     network    = google_compute_network.default.self_link
     access_config {}
   }
-  tags = ["container-vm", "firewall-ssh", "firewall-http-health-check"]
+  tags = ["container-vm", "${google_compute_network.default.name}-firewall-http"]
   metadata = {
     gce-container-declaration = module.gce-container.metadata_value
   }
@@ -81,5 +92,5 @@ resource "google_compute_instance" "vm" {
 }
 
 output "instance_ips" {
-  value = ["${zipmap(google_compute_instance.vm.*.zone,google_compute_instance.vm.*.network_interface.0.network_ip)}"]
+  value = ["${zipmap(google_compute_instance.vm.*.zone,google_compute_instance.vm.*.network_interface.0.access_config.0.nat_ip)}"]
 }
