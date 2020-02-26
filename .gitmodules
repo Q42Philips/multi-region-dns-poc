@@ -1,0 +1,3 @@
+[submodule "zone-printer"]
+	path = zone-printer
+	url = https://github.com/hermanbanken/zone-printer
