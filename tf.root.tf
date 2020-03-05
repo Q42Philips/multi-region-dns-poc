@@ -20,3 +20,13 @@ module "gcp" {
 #
 # 	image_name  = var.image_name
 # }
+
+# outputs
+
+output "instance_ips" {
+	value = module.gcp.instance_ips
+}
+
+output "instance_urls" {
+	value = module.gcp.instance_urls
+}
