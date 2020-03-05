@@ -1,39 +1,15 @@
-variable "image_name" {
-  type        = string
-  description = "The image name to deploy"
-  default     = "hermanbanken/zone-printer:latest"
-}
-
-variable "cos_image_name" {
-  type    = string
-  default = "cos-stable-69-10895-71-0"
-}
-
-variable "zones" {
-  type        = list
-  description = "The zones to deploy in"
-  default = [
-    "asia-east1-a",
-    "asia-east2-a",
-    "asia-northeast2-a",
-    "asia-south1-a",
-    "europe-north1-a",
-    "europe-west4-a",
-    "southamerica-east1-a",
-    "us-east1-b",
-    "us-west2-a",
-    "us-central1-a"
-  ]
-}
+# see also tf.variables.tf tf.network.tf tf.output.tf
 
 provider "google" {
-  project = "cl-dev"
+  project = var.gcp_project
 }
+
+# GCE VM image
 
 module "gce-container" {
   source         = "https://github.com/terraform-google-modules/terraform-google-container-vm/tarball/b452196e32e558234ac46a4078c66bf39fca2b14//terraform-google-modules-terraform-google-container-vm-b452196?archive=tgz"
   
-  cos_image_name = var.cos_image_name
+  cos_image_name = var.host_os_image_name
   container = {
     image        = var.image_name
     volumeMounts = [{ mountPath = "/data", name = "tempfs-0", readOnly = false }]
@@ -42,22 +18,7 @@ module "gce-container" {
   restart_policy = "Always"
 }
 
-resource "google_compute_network" "default" {
-  name                    = "multi-region-dns-poc"
-  auto_create_subnetworks = true
-  routing_mode            = "GLOBAL"
-}
-
-resource "google_compute_firewall" "http" {
-  name    = "${google_compute_network.default.name}-firewall-http"
-  network = google_compute_network.default.name
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-  target_tags   = ["${google_compute_network.default.name}-firewall-http"]
-  source_ranges = ["0.0.0.0/0"]
-}
+# GCE VM instances
 
 resource "google_compute_instance" "vm" {
   count = length(var.zones)
@@ -87,8 +48,4 @@ resource "google_compute_instance" "vm" {
     ]
   }
   allow_stopping_for_update = true
-}
-
-output "instance_ips" {
-  value = ["${zipmap(google_compute_instance.vm.*.zone, google_compute_instance.vm.*.network_interface.0.access_config.0.nat_ip)}"]
 }
