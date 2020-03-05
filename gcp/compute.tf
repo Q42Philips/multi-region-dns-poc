@@ -1,4 +1,4 @@
-# see also tf.variables.tf tf.network.tf tf.output.tf
+# see also variables.tf network.tf output.tf
 
 provider "google" {
   project = var.gcp_project
@@ -8,7 +8,7 @@ provider "google" {
 
 module "gce-container" {
   source         = "https://github.com/terraform-google-modules/terraform-google-container-vm/tarball/b452196e32e558234ac46a4078c66bf39fca2b14//terraform-google-modules-terraform-google-container-vm-b452196?archive=tgz"
-  
+
   cos_image_name = var.host_os_image_name
   container = {
     image        = var.image_name
@@ -22,8 +22,8 @@ module "gce-container" {
 
 resource "google_compute_instance" "vm" {
   count = length(var.zones)
-  name  = "multi-region-dns-poc-${var.zones[count.index]}"
 
+  name  = "multi-region-dns-poc-${var.zones[count.index]}"
   machine_type = "f1-micro"
   zone         = var.zones[count.index]
   boot_disk {
