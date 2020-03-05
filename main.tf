@@ -31,7 +31,8 @@ provider "google" {
 }
 
 module "gce-container" {
-  source         = "git::https://github.com/terraform-google-modules/terraform-google-container-vm?ref=b452196e32e558234ac46a4078c66bf39fca2b14"
+  source         = "https://github.com/terraform-google-modules/terraform-google-container-vm/tarball/b452196e32e558234ac46a4078c66bf39fca2b14//terraform-google-modules-terraform-google-container-vm-b452196?archive=tgz"
+  
   cos_image_name = var.cos_image_name
   container = {
     image        = var.image_name
@@ -42,7 +43,6 @@ module "gce-container" {
 }
 
 resource "google_compute_network" "default" {
-  provider                = google
   name                    = "multi-region-dns-poc"
   auto_create_subnetworks = true
   routing_mode            = "GLOBAL"
@@ -60,9 +60,7 @@ resource "google_compute_firewall" "http" {
 }
 
 resource "google_compute_instance" "vm" {
-  provider = google
-
-  count = "${length(var.zones)}"
+  count = length(var.zones)
   name  = "multi-region-dns-poc-${var.zones[count.index]}"
 
   machine_type = "f1-micro"
