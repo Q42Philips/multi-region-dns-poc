@@ -1,4 +1,5 @@
 module "gcp" {
+  # https://www.terraform.io/docs/providers/google/index.html
 
 	# prepare: gcloud auth login
   source         = "./gcp"
@@ -9,6 +10,7 @@ module "gcp" {
 }
 
 # module "azure" {
+#   # https://www.terraform.io/docs/providers/azurerm/index.html
 #
 # 	# prepare: az login
 #   source         = "./azure"
